@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kelly's Complete Command Center</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -485,13 +486,125 @@
             .card { padding: 16px; }
             .task-title { font-size: 0.9rem; }
         }
+
+        /* Auth Modal */
+        .auth-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .auth-overlay.hidden { display: none; }
+        .auth-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        .auth-card h2 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .auth-card p {
+            color: #666;
+            margin-bottom: 24px;
+        }
+        .auth-card input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            margin-bottom: 12px;
+        }
+        .auth-card input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .auth-card button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-bottom: 12px;
+        }
+        .auth-card button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        .auth-card .toggle-auth {
+            color: #667eea;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .auth-error {
+            color: #f5576c;
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+        }
+        .user-bar {
+            background: rgba(255,255,255,0.15);
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .user-bar span { color: white; font-size: 0.9rem; }
+        .user-bar button {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .sync-status {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.7);
+        }
     </style>
 </head>
 <body>
+    <!-- Auth Modal -->
+    <div class="auth-overlay" id="authOverlay">
+        <div class="auth-card">
+            <h2>✨ Welcome</h2>
+            <p id="authSubtitle">Sign in to sync your tasks across all devices</p>
+            <div class="auth-error" id="authError"></div>
+            <input type="email" id="authEmail" placeholder="Email">
+            <input type="password" id="authPassword" placeholder="Password">
+            <button onclick="handleAuth()" id="authButton">Sign In</button>
+            <div class="toggle-auth" onclick="toggleAuthMode()">
+                <span id="authToggleText">Don't have an account? Sign up</span>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <header>
             <h1>✨ Kelly's Complete Command Center</h1>
-            <p>Saturday, January 31, 2026 • Nothing forgotten</p>
+            <p>Sunday, February 1, 2026 • Nothing forgotten</p>
+            <div class="user-bar" id="userBar" style="display: none;">
+                <span id="userEmail"></span>
+                <span class="sync-status" id="syncStatus">✓ Synced</span>
+                <button onclick="signOut()">Sign Out</button>
+            </div>
             <div class="progress-bar">
                 <div class="progress-fill" id="progressBar"></div>
             </div>
@@ -1251,26 +1364,179 @@
     </div>
 
     <script>
-        // Custom tasks storage
-        let customTasks = {};
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://zrxjhwnqekgovqxotbnl.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_TKtGzQIBvDa41EweS03TiA_ZM9S5Zy6';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let currentUser = null;
+        let isSignUp = false;
+
+        // Auth functions
+        async function handleAuth() {
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            const errorEl = document.getElementById('authError');
+            errorEl.textContent = '';
+
+            if (!email || !password) {
+                errorEl.textContent = 'Please enter email and password';
+                return;
+            }
+
+            try {
+                let result;
+                if (isSignUp) {
+                    result = await supabase.auth.signUp({ email, password });
+                    if (result.error) throw result.error;
+                    if (result.data.user && !result.data.session) {
+                        errorEl.style.color = '#4caf50';
+                        errorEl.textContent = 'Check your email to confirm your account!';
+                        return;
+                    }
+                } else {
+                    result = await supabase.auth.signInWithPassword({ email, password });
+                    if (result.error) throw result.error;
+                }
+                // Auth state change will handle the rest
+            } catch (error) {
+                errorEl.textContent = error.message;
+            }
+        }
+
+        function toggleAuthMode() {
+            isSignUp = !isSignUp;
+            document.getElementById('authButton').textContent = isSignUp ? 'Sign Up' : 'Sign In';
+            document.getElementById('authToggleText').textContent = isSignUp
+                ? 'Already have an account? Sign in'
+                : "Don't have an account? Sign up";
+            document.getElementById('authSubtitle').textContent = isSignUp
+                ? 'Create an account to sync your tasks'
+                : 'Sign in to sync your tasks across all devices';
+            document.getElementById('authError').textContent = '';
+        }
+
+        async function signOut() {
+            await supabase.auth.signOut();
+            currentUser = null;
+            document.getElementById('authOverlay').classList.remove('hidden');
+            document.getElementById('userBar').style.display = 'none';
+        }
+
+        function showApp(user) {
+            currentUser = user;
+            document.getElementById('authOverlay').classList.add('hidden');
+            document.getElementById('userBar').style.display = 'inline-flex';
+            document.getElementById('userEmail').textContent = user.email;
+            loadTasksFromSupabase();
+        }
+
+        // Supabase task functions
+        async function loadTasksFromSupabase() {
+            if (!currentUser) return;
+
+            setSyncStatus('Syncing...');
+            try {
+                const { data, error } = await supabase
+                    .from('tasks')
+                    .select('*')
+                    .eq('user_id', currentUser.id);
+
+                if (error) throw error;
+
+                // Clear existing custom tasks
+                document.querySelectorAll('.custom-tasks').forEach(el => el.innerHTML = '');
+
+                // Render tasks from database
+                if (data) {
+                    data.forEach(task => {
+                        renderCustomTask(task.section, {
+                            id: task.id,
+                            title: task.title,
+                            completed: task.completed
+                        });
+                    });
+                }
+                setSyncStatus('✓ Synced');
+            } catch (error) {
+                console.error('Error loading tasks:', error);
+                setSyncStatus('Sync error');
+            }
+            updateProgress();
+        }
+
+        async function saveTaskToSupabase(task, section) {
+            if (!currentUser) return;
+
+            setSyncStatus('Saving...');
+            try {
+                const { error } = await supabase
+                    .from('tasks')
+                    .insert({
+                        id: task.id,
+                        title: task.title,
+                        section: section,
+                        completed: task.completed,
+                        user_id: currentUser.id
+                    });
+
+                if (error) throw error;
+                setSyncStatus('✓ Synced');
+            } catch (error) {
+                console.error('Error saving task:', error);
+                setSyncStatus('Sync error');
+            }
+        }
+
+        async function updateTaskInSupabase(taskId, completed) {
+            if (!currentUser) return;
+
+            setSyncStatus('Saving...');
+            try {
+                const { error } = await supabase
+                    .from('tasks')
+                    .update({ completed })
+                    .eq('id', taskId);
+
+                if (error) throw error;
+                setSyncStatus('✓ Synced');
+            } catch (error) {
+                console.error('Error updating task:', error);
+                setSyncStatus('Sync error');
+            }
+        }
+
+        async function deleteTaskFromSupabase(taskId) {
+            if (!currentUser) return;
+
+            setSyncStatus('Saving...');
+            try {
+                const { error } = await supabase
+                    .from('tasks')
+                    .delete()
+                    .eq('id', taskId);
+
+                if (error) throw error;
+                setSyncStatus('✓ Synced');
+            } catch (error) {
+                console.error('Error deleting task:', error);
+                setSyncStatus('Sync error');
+            }
+        }
+
+        function setSyncStatus(status) {
+            document.getElementById('syncStatus').textContent = status;
+        }
 
         // Toggle task completion
         function toggleTask(checkbox) {
             checkbox.classList.toggle('checked');
             checkbox.closest('.task-item').classList.toggle('completed');
 
-            // Check if this is a custom task and save its state
             const taskItem = checkbox.closest('.task-item');
             if (taskItem.dataset.customId) {
-                const section = taskItem.dataset.task;
-                const taskId = taskItem.dataset.customId;
-                if (customTasks[section]) {
-                    const task = customTasks[section].find(t => t.id === taskId);
-                    if (task) {
-                        task.completed = checkbox.classList.contains('checked');
-                        saveCustomTasks();
-                    }
-                }
+                const completed = checkbox.classList.contains('checked');
+                updateTaskInSupabase(taskItem.dataset.customId, completed);
             }
 
             updateProgress();
@@ -1282,6 +1548,7 @@
             header.classList.toggle('collapsed');
             const content = header.nextElementSibling;
             content.classList.toggle('collapsed');
+            saveState();
         }
 
         // Toggle rules panel
@@ -1320,25 +1587,15 @@
 
             if (!title) return;
 
-            // Create task object
             const task = {
-                id: 'task-' + Date.now(),
+                id: crypto.randomUUID(),
                 title: title,
-                completed: false,
-                createdAt: new Date().toISOString()
+                completed: false
             };
 
-            // Add to storage
-            if (!customTasks[section]) {
-                customTasks[section] = [];
-            }
-            customTasks[section].push(task);
-
-            // Save and render
-            saveCustomTasks();
             renderCustomTask(section, task);
+            saveTaskToSupabase(task, section);
 
-            // Clear and hide form
             hideAddForm(section);
             updateProgress();
         }
@@ -1346,6 +1603,7 @@
         // Render a single custom task
         function renderCustomTask(section, task) {
             const container = document.getElementById('custom-' + section);
+            if (!container) return;
 
             const taskHtml = `
                 <div class="task-item ${task.completed ? 'completed' : ''}" data-task="${section}" data-custom-id="${task.id}">
@@ -1364,39 +1622,13 @@
         function deleteTask(section, taskId) {
             if (!confirm('Delete this task?')) return;
 
-            // Remove from storage
-            if (customTasks[section]) {
-                customTasks[section] = customTasks[section].filter(t => t.id !== taskId);
-                saveCustomTasks();
-            }
-
-            // Remove from DOM
             const taskElement = document.querySelector(`[data-custom-id="${taskId}"]`);
             if (taskElement) {
                 taskElement.remove();
             }
 
+            deleteTaskFromSupabase(taskId);
             updateProgress();
-        }
-
-        // Save custom tasks to localStorage
-        function saveCustomTasks() {
-            localStorage.setItem('kellyCustomTasks', JSON.stringify(customTasks));
-        }
-
-        // Load custom tasks from localStorage
-        function loadCustomTasks() {
-            const saved = localStorage.getItem('kellyCustomTasks');
-            if (saved) {
-                customTasks = JSON.parse(saved);
-
-                // Render all custom tasks
-                for (const section in customTasks) {
-                    customTasks[section].forEach(task => {
-                        renderCustomTask(section, task);
-                    });
-                }
-            }
         }
 
         // Escape HTML to prevent XSS
@@ -1417,28 +1649,25 @@
             document.getElementById('totalCount').textContent = total;
         }
 
-        // Save state to localStorage
+        // Save local state (for hardcoded tasks and collapsed sections)
         function saveState() {
-            // Save original task states (by index for hardcoded tasks)
             const checkboxes = document.querySelectorAll('.task-item:not([data-custom-id]) .task-checkbox');
             const state = [];
-            checkboxes.forEach((cb, index) => {
+            checkboxes.forEach((cb) => {
                 state.push(cb.classList.contains('checked'));
             });
             localStorage.setItem('kellyTasksComplete', JSON.stringify(state));
 
-            // Save collapsed state
             const headers = document.querySelectorAll('.collapsible-header');
             const collapsed = [];
-            headers.forEach((h, index) => {
+            headers.forEach((h) => {
                 collapsed.push(h.classList.contains('collapsed'));
             });
             localStorage.setItem('kellyCollapsed', JSON.stringify(collapsed));
         }
 
-        // Load state from localStorage
-        function loadState() {
-            // Load original task states
+        // Load local state
+        function loadLocalState() {
             const saved = localStorage.getItem('kellyTasksComplete');
             if (saved) {
                 const state = JSON.parse(saved);
@@ -1451,7 +1680,6 @@
                 });
             }
 
-            // Load collapsed state
             const collapsedSaved = localStorage.getItem('kellyCollapsed');
             if (collapsedSaved) {
                 const collapsed = JSON.parse(collapsedSaved);
@@ -1467,14 +1695,26 @@
                 });
             }
 
-            // Load custom tasks
-            loadCustomTasks();
-
             updateProgress();
         }
 
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', loadState);
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            loadLocalState();
+
+            // Check for existing session
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.user) {
+                showApp(session.user);
+            }
+
+            // Listen for auth changes
+            supabase.auth.onAuthStateChange((event, session) => {
+                if (session?.user) {
+                    showApp(session.user);
+                }
+            });
+        });
     </script>
 </body>
 </html>
