@@ -549,6 +549,11 @@
             color: #667eea;
             cursor: pointer;
             font-size: 0.9rem;
+            text-decoration: none;
+            display: block;
+        }
+        .auth-card .toggle-auth:hover {
+            text-decoration: underline;
         }
         .auth-error {
             color: #f5576c;
@@ -590,9 +595,9 @@
             <input type="email" id="authEmail" placeholder="Email">
             <input type="password" id="authPassword" placeholder="Password">
             <button onclick="handleAuth()" id="authButton">Sign In</button>
-            <div class="toggle-auth" onclick="toggleAuthMode()">
+            <a href="#" class="toggle-auth" id="authToggle">
                 <span id="authToggleText">Don't have an account? Sign up</span>
-            </div>
+            </a>
         </div>
     </div>
 
@@ -1366,7 +1371,7 @@
     <script>
         // Supabase Configuration
         const SUPABASE_URL = 'https://zrxjhwnqekgovqxotbnl.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpyeGpod25xZWtnb3ZxeG90Ym5sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5NzUxMjEsImV4cCI6MjA4NTU1MTEyMX0.1ig0Ma5ZQ49ifEVkZkrrAGRx8J3-9Iqa8okko_bNQOM;
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpyeGpod25xZWtnb3ZxeG90Ym5sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5NzUxMjEsImV4cCI6MjA4NTU1MTEyMX0.1ig0Ma5ZQ49ifEVkZkrrAGRx8J3-9Iqa8okko_bNQOM';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let currentUser = null;
@@ -1701,6 +1706,12 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
             loadLocalState();
+
+            // Add click handler for auth toggle
+            document.getElementById('authToggle').addEventListener('click', function(e) {
+                e.preventDefault();
+                toggleAuthMode();
+            });
 
             // Check for existing session
             const { data: { session } } = await supabase.auth.getSession();
