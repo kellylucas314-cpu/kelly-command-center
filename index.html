@@ -542,14 +542,18 @@
 
         <!-- 48-HOUR COMMIT LIST -->
         <div class="card commit-card">
-            <div class="card-header">
-                <div class="card-icon">🎯</div>
-                <div>
-                    <div class="card-title">48-Hour Commit List</div>
-                    <div class="card-subtitle">Only these 3 things matter right now • Jan 31 – Feb 2</div>
+            <div class="card-header collapsible-header" onclick="toggleSection(this)">
+                <div style="display: flex; align-items: center;">
+                    <div class="card-icon">🎯</div>
+                    <div>
+                        <div class="card-title">48-Hour Commit List</div>
+                        <div class="card-subtitle">Only these 3 things matter right now • Jan 31 – Feb 2</div>
+                    </div>
                 </div>
-                <button class="add-task-btn" onclick="showAddForm('commit')">+</button>
+                <button class="add-task-btn" onclick="event.stopPropagation(); showAddForm('commit')">+</button>
+                <span class="arrow">▼</span>
             </div>
+            <div class="collapsible-content">
             <div class="add-task-form" id="form-commit">
                 <input type="text" id="input-commit" placeholder="Add a new task..." onkeypress="handleEnter(event, 'commit')">
                 <div class="form-btns">
@@ -587,18 +591,23 @@
                 </div>
             </div>
             <div class="custom-tasks" id="custom-commit"></div>
+            </div>
         </div>
 
         <!-- LIFE ADMIN - TIME SENSITIVE -->
         <div class="card life-card">
-            <div class="card-header">
-                <div class="card-icon">🏠</div>
-                <div>
-                    <div class="card-title">Life Admin - Time Sensitive</div>
-                    <div class="card-subtitle">Bills + appointments that can't wait</div>
+            <div class="card-header collapsible-header" onclick="toggleSection(this)">
+                <div style="display: flex; align-items: center;">
+                    <div class="card-icon">🏠</div>
+                    <div>
+                        <div class="card-title">Life Admin - Time Sensitive</div>
+                        <div class="card-subtitle">Bills + appointments that can't wait</div>
+                    </div>
                 </div>
-                <button class="add-task-btn" onclick="showAddForm('life')">+</button>
+                <button class="add-task-btn" onclick="event.stopPropagation(); showAddForm('life')">+</button>
+                <span class="arrow">▼</span>
             </div>
+            <div class="collapsible-content">
             <div class="add-task-form" id="form-life">
                 <input type="text" id="input-life" placeholder="Add a new task..." onkeypress="handleEnter(event, 'life')">
                 <div class="form-btns">
@@ -681,6 +690,7 @@
                 </div>
             </div>
             <div class="custom-tasks" id="custom-life"></div>
+            </div>
         </div>
 
         <!-- HELIOFLUX THIS WEEK -->
