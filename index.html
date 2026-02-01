@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelly's Complete Command Center</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            font-weight: 300;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .progress-bar {
+            background: rgba(255,255,255,0.3);
+            border-radius: 20px;
+            height: 12px;
+            margin: 20px auto;
+            max-width: 400px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #00f260, #0575e6);
+            height: 100%;
+            border-radius: 20px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        .progress-text {
+            color: white;
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .card-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            margin-right: 12px;
+        }
+
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .card-subtitle {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 2px;
+        }
+
+        /* Commit List - Most Important */
+        .commit-card {
+            border: 3px solid #667eea;
+            background: linear-gradient(to bottom right, #fff, #f8f9ff);
+        }
+
+        .commit-card .card-icon {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        /* Life Admin */
+        .life-card .card-icon {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+        }
+
+        /* This Week */
+        .week-card .card-icon {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+        }
+
+        /* System Setup */
+        .system-card .card-icon {
+            background: linear-gradient(135deg, #43e97b, #38f9d7);
+            color: white;
+        }
+
+        /* Deliverables */
+        .deliverables-card .card-icon {
+            background: linear-gradient(135deg, #fa709a, #fee140);
+            color: white;
+        }
+
+        /* Parking Lot */
+        .parking-card .card-icon {
+            background: linear-gradient(135deg, #a8c0ff, #3f2b96);
+            color: white;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 10px 0;
+            border-bottom: 1px solid #f5f5f5;
+            transition: all 0.2s ease;
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-item:hover {
+            background: #fafafa;
+            margin: 0 -8px;
+            padding: 10px 8px;
+            border-radius: 8px;
+        }
+
+        .task-checkbox {
+            width: 22px;
+            height: 22px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            margin-right: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+            margin-top: 2px;
+        }
+
+        .task-checkbox:hover {
+            border-color: #667eea;
+        }
+
+        .task-checkbox.checked {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+        }
+
+        .task-checkbox.checked::after {
+            content: '✓';
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
+        .task-title {
+            font-size: 0.95rem;
+            color: #333;
+            line-height: 1.4;
+            transition: all 0.2s ease;
+        }
+
+        .task-item.completed .task-title {
+            text-decoration: line-through;
+            color: #aaa;
+        }
+
+        .task-details {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 3px;
+            line-height: 1.4;
+        }
+
+        .task-tag {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            margin-right: 4px;
+            margin-top: 4px;
+        }
+
+        .tag-helioflux { background: #e8e4ff; color: #667eea; }
+        .tag-life { background: #ffe4f0; color: #f5576c; }
+        .tag-urgent { background: #fff3e0; color: #ff9800; }
+        .tag-money { background: #e8f5e9; color: #4caf50; }
+        .tag-outreach { background: #e3f2fd; color: #1976d2; }
+        .tag-partner { background: #fce4ec; color: #c2185b; }
+
+        /* Add Task Button & Form */
+        .add-task-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            margin-left: auto;
+        }
+
+        .add-task-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .add-task-form {
+            display: none;
+            background: #f8f9ff;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: 2px dashed #667eea;
+        }
+
+        .add-task-form.active {
+            display: block;
+        }
+
+        .add-task-form input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+        }
+
+        .add-task-form input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .add-task-form .form-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .add-task-form button {
+            padding: 6px 14px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .add-task-form .save-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .add-task-form .cancel-btn {
+            background: #e0e0e0;
+            color: #666;
+        }
+
+        .task-delete {
+            color: #ccc;
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 0 6px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .task-item:hover .task-delete {
+            opacity: 1;
+        }
+
+        .task-delete:hover {
+            color: #f5576c;
+        }
+
+        .card-header-wrap {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .collapsible-header .add-task-btn {
+            margin-left: auto;
+            margin-right: 12px;
+        }
+
+        .custom-tasks {
+            margin-top: 8px;
+        }
+
+        /* Collapsible sections */
+        .collapsible-header {
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            margin-bottom: 8px;
+        }
+
+        .collapsible-header .arrow {
+            transition: transform 0.3s ease;
+            font-size: 1rem;
+            color: #888;
+        }
+
+        .collapsible-header.collapsed .arrow {
+            transform: rotate(-90deg);
+        }
+
+        .collapsible-content {
+            transition: all 0.3s ease;
+        }
+
+        .collapsible-content.collapsed {
+            display: none;
+        }
+
+        /* Collapsible System Rules */
+        .rules-toggle {
+            background: rgba(255,255,255,0.95);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+
+        .rules-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .rules-toggle h3 {
+            font-size: 1rem;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+        }
+
+        .rules-toggle .arrow {
+            transition: transform 0.3s ease;
+            font-size: 1.2rem;
+            color: #888;
+        }
+
+        .rules-toggle.open .arrow {
+            transform: rotate(180deg);
+        }
+
+        .rules-content {
+            background: white;
+            border-radius: 12px;
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .rules-content.open {
+            padding: 24px;
+            max-height: 1000px;
+        }
+
+        .rule-section {
+            margin-bottom: 20px;
+        }
+
+        .rule-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .rule-section h4 {
+            font-size: 0.9rem;
+            color: #667eea;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .rule-section p, .rule-section li {
+            font-size: 0.9rem;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .rule-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .rule-section li {
+            padding: 4px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .rule-section li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: #667eea;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            padding: 20px;
+            font-size: 0.85rem;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.6rem; }
+            .card { padding: 16px; }
+            .task-title { font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>✨ Kelly's Complete Command Center</h1>
+            <p>Saturday, January 31, 2026 • Nothing forgotten</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            <p class="progress-text"><span id="completedCount">0</span> of <span id="totalCount">0</span> tasks complete</p>
+        </header>
+
+        <!-- System Rules (Collapsible) -->
+        <div class="rules-toggle" onclick="toggleRules()">
+            <h3>📋 System Rules (tap to expand)</h3>
+            <span class="arrow">▼</span>
+        </div>
+        <div class="rules-content" id="rulesContent">
+            <div class="rule-section">
+                <h4>One Job Per Tool</h4>
+                <ul>
+                    <li><strong>Notion</strong> = the map (projects, next actions, decisions, links)</li>
+                    <li><strong>Drive</strong> = the file cabinet (actual files, version history)</li>
+                    <li><strong>Desktop</strong> = triage only (staging, not storage)</li>
+                </ul>
+            </div>
+            <div class="rule-section">
+                <h4>The 3 Inboxes (Only These Exist)</h4>
+                <ul>
+                    <li>Desktop INBOX</li>
+                    <li>Drive 00 Inbox (HelioFlux or Life)</li>
+                    <li>Notion Inbox database</li>
+                </ul>
+            </div>
+            <div class="rule-section">
+                <h4>Processing Question</h4>
+                <p>When you process anything, ask: <strong>Action, Reference, or File?</strong></p>
+                <ul>
+                    <li><strong>Action</strong> → task inside the relevant project</li>
+                    <li><strong>Reference</strong> → Notion note + link to files</li>
+                    <li><strong>File</strong> → move to Drive folder + link from Notion</li>
+                </ul>
+            </div>
+            <div class="rule-section">
+                <h4>ADHD Guardrails</h4>
+                <ul>
+                    <li>48-hour Commit List = <strong>MAX 3 items</strong> (only these compete for attention)</li>
+                    <li>HelioFlux Now = top 5 projects (updated weekly)</li>
+                    <li>Life Now = top 3 priorities (updated weekly)</li>
+                    <li>Weekly reset: 30 min to process inboxes to zero</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 48-HOUR COMMIT LIST -->
+        <div class="card commit-card">
+            <div class="card-header">
+                <div class="card-icon">🎯</div>
+                <div>
+                    <div class="card-title">48-Hour Commit List</div>
+                    <div class="card-subtitle">Only these 3 things matter right now • Jan 31 – Feb 2</div>
+                </div>
+                <button class="add-task-btn" onclick="showAddForm('commit')">+</button>
+            </div>
+            <div class="add-task-form" id="form-commit">
+                <input type="text" id="input-commit" placeholder="Add a new task..." onkeypress="handleEnter(event, 'commit')">
+                <div class="form-btns">
+                    <button class="save-btn" onclick="addTask('commit')">Add</button>
+                    <button class="cancel-btn" onclick="hideAddForm('commit')">Cancel</button>
+                </div>
+            </div>
+
+            <div class="task-item" data-task="commit">
+                <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                <div class="task-content">
+                    <div class="task-title">Send Conafay package</div>
+                    <div class="task-details">One pager + Gantt chart + budget ladder + explainer video link</div>
+                    <span class="tag-helioflux task-tag">HelioFlux</span>
+                    <span class="tag-urgent task-tag">High Priority</span>
+                </div>
+            </div>
+
+            <div class="task-item" data-task="commit">
+                <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                <div class="task-content">
+                    <div class="task-title">Schedule Strong Force IP meeting + start IP snapshot</div>
+                    <div class="task-details">Meeting with Michelle. Send: deck, one pager, invention list (Detection + Therapy), provisional receipts/drafts, university affiliation notes</div>
+                    <span class="tag-helioflux task-tag">HelioFlux</span>
+                    <span class="tag-urgent task-tag">High Priority</span>
+                </div>
+            </div>
+
+            <div class="task-item" data-task="commit">
+                <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                <div class="task-content">
+                    <div class="task-title">Lock budget ladder as canonical + link everywhere</div>
+                    <div class="task-details">Phase 1: $300k-500k (6mo) • Phase 2: $1.0M-2.5M (6-18mo) • Phase 3: $5M-15M (18-36mo)</div>
+                    <span class="tag-helioflux task-tag">HelioFlux</span>
+                </div>
+            </div>
+            <div class="custom-tasks" id="custom-commit"></div>
+        </div>
+
+        <!-- LIFE ADMIN - TIME SENSITIVE -->
+        <div class="card life-card">
+            <div class="card-header">
+                <div class="card-icon">🏠</div>
+                <div>
+                    <div class="card-title">Life Admin - Time Sensitive</div>
+                    <div class="card-subtitle">Bills + appointments that can't wait</div>
+                </div>
+                <button class="add-task-btn" onclick="showAddForm('life')">+</button>
+            </div>
+            <div class="add-task-form" id="form-life">
+                <input type="text" id="input-life" placeholder="Add a new task..." onkeypress="handleEnter(event, 'life')">
+                <div class="form-btns">
+                    <button class="save-btn" onclick="addTask('life')">Add</button>
+                    <button class="cancel-btn" onclick="hideAddForm('life')">Cancel</button>
+                </div>
+            </div>
+
+            <div class="task-item" data-task="life">
+                <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                <div class="task-content">
+                    <div class="task-title">Rent due tomorrow (Feb 1)</div>
+                    <div class="task-details">Confirm amount + how you'll pay</div>
+                    <span class="tag-life task-tag">Life</span>
+                    <span class="tag-urgent task-tag">Due Tomorrow</span>
+                    <span class="tag-money task-tag">$$$</span>
+                </div>
+            </div>
+
+            <div class="task-item" data-task="life">
+                <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                <div class="task-content">
+                    <div class="task-title">DMV parking passes with Anna @ 2pm tomorrow</div>
+                    <div class="task-details">Confirm DMV location + required materials</div>
+                    <span class="tag-life task-tag">Life</span>
+                    <span class="tag-urgent task-tag">Due Tomorrow</span>
+                </div>
+            </div>
+
+            <div class="task-item" data-task="life">
+                <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                <div class="task-content">
+                    <div class="task-title">Pay Ellie's insurance + update payment card</div>
+                    <span class="tag-life task-tag">Life</span>
+                    <span class="tag-money task-tag">$$$</span>
+                </div>
+            </div>
+
+            <div class="task-item" data-task="life">
+                <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                <div class="task-content">
+                    <div class="task-title">Pay Apple Card</div>
+                    <span class="tag-life task-tag">Life</span>
+                    <span class="tag-money task-tag">$$$</span>
+                </div>
+            </div>
+
+            <div class="task-item" data-task="life">
+                <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                <div class="task-content">
+                    <div class="task-title">Pay insurance bill (~$800)</div>
+                    <span class="tag-life task-tag">Life</span>
+                    <span class="tag-money task-tag">$$$</span>
+                </div>
+            </div>
+
+            <div class="task-item" data-task="life">
+                <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                <div class="task-content">
+                    <div class="task-title">Pay Julia for internet</div>
+                    <span class="tag-life task-tag">Life</span>
+                    <span class="tag-money task-tag">$$$</span>
+                </div>
+            </div>
+
+            <div class="task-item" data-task="life">
+                <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                <div class="task-content">
+                    <div class="task-title">Warby Parker (3rd Street) – updated glasses prescription</div>
+                    <span class="tag-life task-tag">Life</span>
+                </div>
+            </div>
+
+            <div class="task-item" data-task="life">
+                <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                <div class="task-content">
+                    <div class="task-title">Quick termite check on coffee table</div>
+                    <div class="task-details">Snap a photo if needed</div>
+                    <span class="tag-life task-tag">Life</span>
+                </div>
+            </div>
+            <div class="custom-tasks" id="custom-life"></div>
+        </div>
+
+        <!-- HELIOFLUX THIS WEEK -->
+        <div class="card week-card">
+            <div class="card-header collapsible-header" onclick="toggleSection(this)">
+                <div style="display: flex; align-items: center;">
+                    <div class="card-icon">📅</div>
+                    <div>
+                        <div class="card-title">HelioFlux This Week</div>
+                        <div class="card-subtitle">Feb 1 – Feb 7</div>
+                    </div>
+                </div>
+                <button class="add-task-btn" onclick="event.stopPropagation(); showAddForm('week')">+</button>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="collapsible-content">
+                <div class="add-task-form" id="form-week">
+                    <input type="text" id="input-week" placeholder="Add a new task..." onkeypress="handleEnter(event, 'week')">
+                    <div class="form-btns">
+                        <button class="save-btn" onclick="addTask('week')">Add</button>
+                        <button class="cancel-btn" onclick="hideAddForm('week')">Cancel</button>
+                    </div>
+                </div>
+                <div class="task-item" data-task="week">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Create Conafay-friendly Gantt chart</div>
+                        <div class="task-details">Phases, duration, measurable outputs, cost → export as clean 1-page PDF</div>
+                        <span class="tag-helioflux task-tag">HelioFlux</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="week">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Create two one-pagers (cancer-first + brain-first)</div>
+                        <div class="task-details">Safe, consistent claims across both versions</div>
+                        <span class="tag-helioflux task-tag">HelioFlux</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="week">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Create "Evidence and Claims" appendix</div>
+                        <div class="task-details">Claimable today vs animal-only vs hypothesis vs needs validation</div>
+                        <span class="tag-helioflux task-tag">HelioFlux</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="week">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Prepare clean IP snapshot</div>
+                        <div class="task-details">Filed, ownership, what's assigned to company, what's unencumbered</div>
+                        <span class="tag-helioflux task-tag">HelioFlux</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="week">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Helio team meeting</div>
+                        <div class="task-details">Choose 90-day primary lane + lock 3 measurable outputs + owners</div>
+                        <span class="tag-helioflux task-tag">HelioFlux</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="week">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Write one tight DC ask statement</div>
+                        <div class="task-details">1 sentence: what you want + how much + what it unlocks + why it matters to government</div>
+                        <span class="tag-helioflux task-tag">HelioFlux</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="week">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Agency target list for Conafay</div>
+                        <div class="task-details">DARPA, ARPA-H, BARDA, NIH, DOD health, VA → 1-2 sentence fit rationale each</div>
+                        <span class="tag-helioflux task-tag">HelioFlux</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="week">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Ask Josh at Conafay for intros</div>
+                        <div class="task-details">3-5 investigator intros + 1 fast university protocol partner</div>
+                        <span class="tag-helioflux task-tag">HelioFlux</span>
+                        <span class="tag-outreach task-tag">Outreach</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="week">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Website next steps</div>
+                        <div class="task-details">Decide what must change now + who owns it</div>
+                        <span class="tag-helioflux task-tag">HelioFlux</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="week">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">David follow-up: Conafay intro</div>
+                        <div class="task-details">Confirm Conafay intro to Darren + CEO was sent. If not, you send and cc David</div>
+                        <span class="tag-helioflux task-tag">HelioFlux</span>
+                        <span class="tag-outreach task-tag">Outreach</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="week">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Ask David for Andromeda Ventures intro</div>
+                        <div class="task-details">Intro to Christian Elam</div>
+                        <span class="tag-helioflux task-tag">HelioFlux</span>
+                        <span class="tag-outreach task-tag">Outreach</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="week">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Send Nirosha the papers and materials with links</div>
+                        <div class="task-details">Morning task - share relevant papers + materials</div>
+                        <span class="tag-helioflux task-tag">HelioFlux</span>
+                        <span class="tag-partner task-tag">Nirosha</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="week">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Figure out what else to send Nirosha / upload to shared docs</div>
+                        <span class="tag-helioflux task-tag">HelioFlux</span>
+                        <span class="tag-partner task-tag">Nirosha</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="week">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Create simple infographics for Brain and Cancer</div>
+                        <div class="task-details">Visual 1-pagers for each application area</div>
+                        <span class="tag-helioflux task-tag">HelioFlux</span>
+                    </div>
+                </div>
+                <div class="custom-tasks" id="custom-week"></div>
+            </div>
+        </div>
+
+        <!-- DELIVERABLES FROM CALLS -->
+        <div class="card deliverables-card">
+            <div class="card-header collapsible-header" onclick="toggleSection(this)">
+                <div style="display: flex; align-items: center;">
+                    <div class="card-icon">📦</div>
+                    <div>
+                        <div class="card-title">Deliverables from Calls</div>
+                        <div class="card-subtitle">Outputs with owners assigned</div>
+                    </div>
+                </div>
+                <button class="add-task-btn" onclick="event.stopPropagation(); showAddForm('deliverables')">+</button>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="collapsible-content">
+                <div class="add-task-form" id="form-deliverables">
+                    <input type="text" id="input-deliverables" placeholder="Add a new task..." onkeypress="handleEnter(event, 'deliverables')">
+                    <div class="form-btns">
+                        <button class="save-btn" onclick="addTask('deliverables')">Add</button>
+                        <button class="cancel-btn" onclick="hideAddForm('deliverables')">Cancel</button>
+                    </div>
+                </div>
+                <div class="task-item" data-task="deliverables">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Takashi-specific fundraising packet</div>
+                        <div class="task-details">1-2 page writeup: what we're doing, why it matters, funds needed, milestones, clear ask. You draft, Nirosha edits</div>
+                        <span class="tag-helioflux task-tag">HelioFlux</span>
+                        <span class="tag-partner task-tag">Fundraising</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="deliverables">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Investor update deck (StartEngine, Dan, supporters)</div>
+                        <div class="task-details">Progress proof, credibility proof (NPR, SciAm, Radiolab), what's next. You build, Nirosha supplies bullets, Glenn narrative check</div>
+                        <span class="tag-helioflux task-tag">HelioFlux</span>
+                        <span class="tag-partner task-tag">Fundraising</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="deliverables">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Two one-year roadmaps (cancer + wellness)</div>
+                        <div class="task-details">Use case, study design, partner sites, data collected, budget, quarterly deliverables. Workshop with all three, you write final</div>
+                        <span class="tag-helioflux task-tag">HelioFlux</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="deliverables">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Visuals to support the story</div>
+                        <div class="task-details">Photos: melanoma tent workflow, sleeve setup, helmet/lab. Nirosha sends photos, you polish</div>
+                        <span class="tag-helioflux task-tag">HelioFlux</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="deliverables">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Company address consistency</div>
+                        <div class="task-details">Fix across IRS + bank card profile. You + Nirosha coordinate, Glenn monitors IRS/bank steps</div>
+                        <span class="tag-helioflux task-tag">HelioFlux</span>
+                    </div>
+                </div>
+                <div class="custom-tasks" id="custom-deliverables"></div>
+            </div>
+        </div>
+
+        <!-- OUTREACH SENDS -->
+        <div class="card" style="border-left: 4px solid #1976d2;">
+            <div class="card-header collapsible-header" onclick="toggleSection(this)">
+                <div style="display: flex; align-items: center;">
+                    <div class="card-icon" style="background: linear-gradient(135deg, #1976d2, #64b5f6); color: white;">📧</div>
+                    <div>
+                        <div class="card-title">Outreach Sends</div>
+                        <div class="card-subtitle">Videos, intros, follow-ups</div>
+                    </div>
+                </div>
+                <button class="add-task-btn" onclick="event.stopPropagation(); showAddForm('outreach')">+</button>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="collapsible-content">
+                <div class="add-task-form" id="form-outreach">
+                    <input type="text" id="input-outreach" placeholder="Add a new task..." onkeypress="handleEnter(event, 'outreach')">
+                    <div class="form-btns">
+                        <button class="save-btn" onclick="addTask('outreach')">Add</button>
+                        <button class="cancel-btn" onclick="hideAddForm('outreach')">Cancel</button>
+                    </div>
+                </div>
+                <div class="task-item" data-task="outreach">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Send updated video to Mike Rosenberg</div>
+                        <span class="tag-outreach task-tag">Outreach</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="outreach">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Send video to Portia, Richard, Rich, Whitney</div>
+                        <span class="tag-outreach task-tag">Outreach</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="outreach">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Re-engage Joe, Matt, Lenny</div>
+                        <div class="task-details">Glenn handles these check-ins</div>
+                        <span class="tag-outreach task-tag">Outreach</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="outreach">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Sensor vendor follow-up</div>
+                        <span class="tag-outreach task-tag">Outreach</span>
+                    </div>
+                </div>
+                <div class="custom-tasks" id="custom-outreach"></div>
+            </div>
+        </div>
+
+        <!-- ARPA-H PREP -->
+        <div class="card" style="border-left: 4px solid #9c27b0;">
+            <div class="card-header collapsible-header" onclick="toggleSection(this)">
+                <div style="display: flex; align-items: center;">
+                    <div class="card-icon" style="background: linear-gradient(135deg, #9c27b0, #e1bee7); color: white;">🏛️</div>
+                    <div>
+                        <div class="card-title">ARPA-H Meeting Prep</div>
+                        <div class="card-subtitle">Feb 23, Boston</div>
+                    </div>
+                </div>
+                <button class="add-task-btn" onclick="event.stopPropagation(); showAddForm('arpa')">+</button>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="collapsible-content">
+                <div class="add-task-form" id="form-arpa">
+                    <input type="text" id="input-arpa" placeholder="Add a new task..." onkeypress="handleEnter(event, 'arpa')">
+                    <div class="form-btns">
+                        <button class="save-btn" onclick="addTask('arpa')">Add</button>
+                        <button class="cancel-btn" onclick="hideAddForm('arpa')">Cancel</button>
+                    </div>
+                </div>
+                <div class="task-item" data-task="arpa">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Build list of 20 quantum health companies</div>
+                        <div class="task-details">Company, what they do, why relevant</div>
+                        <span class="tag-helioflux task-tag">HelioFlux</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="arpa">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Write one-liner: why HelioFlux belongs</div>
+                        <div class="task-details">1 sentence + 1 paragraph version</div>
+                        <span class="tag-helioflux task-tag">HelioFlux</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="arpa">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Decide what you want from the room</div>
+                        <div class="task-details">Partnerships, program alignment, solicitation shaping, intros to program managers</div>
+                        <span class="tag-helioflux task-tag">HelioFlux</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="arpa">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">ARPA-H readiness one-pager</div>
+                        <div class="task-details">Nirosha leads, you format. HelioFlux positioning + 20 companies + how you fit</div>
+                        <span class="tag-helioflux task-tag">HelioFlux</span>
+                    </div>
+                </div>
+                <div class="custom-tasks" id="custom-arpa"></div>
+            </div>
+        </div>
+
+        <!-- SYSTEM SETUP -->
+        <div class="card system-card">
+            <div class="card-header collapsible-header" onclick="toggleSection(this)">
+                <div style="display: flex; align-items: center;">
+                    <div class="card-icon">⚙️</div>
+                    <div>
+                        <div class="card-title">System Setup</div>
+                        <div class="card-subtitle">Build the skeleton while you work</div>
+                    </div>
+                </div>
+                <button class="add-task-btn" onclick="event.stopPropagation(); showAddForm('system')">+</button>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="collapsible-content">
+                <div class="add-task-form" id="form-system">
+                    <input type="text" id="input-system" placeholder="Add a new task..." onkeypress="handleEnter(event, 'system')">
+                    <div class="form-btns">
+                        <button class="save-btn" onclick="addTask('system')">Add</button>
+                        <button class="cancel-btn" onclick="hideAddForm('system')">Cancel</button>
+                    </div>
+                </div>
+                <div class="task-item" data-task="system">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Desktop: Create 4 folders</div>
+                        <div class="task-details">INBOX / HelioFlux Active / Life Active / OUTBOX</div>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="system">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Drive: Create HelioFlux folder structure</div>
+                        <div class="task-details">00 Inbox, 01 Clean to Send, 02 Decks, 03 Fundraising... 11 Working Scratch... 99 Archive</div>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="system">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Drive: Create Life folder structure</div>
+                        <div class="task-details">00 Inbox, Job Applications, Logistics, Self Care, Social, Creative, Learning, 99 Archive</div>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="system">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Notion: Create HelioFlux Home + Life Home pages</div>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="system">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Notion: Create Inbox database</div>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="system">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Notion: Create Projects database</div>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="system">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Set standing cadence: Monday 15-min alignment meeting</div>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="system">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Upload recent meeting transcripts + Claude Code files to HelioFlux Drive</div>
+                        <div class="task-details">File everything in the right folders</div>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="system">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Add recent transcripts into NotebookLM or Claude</div>
+                        <div class="task-details">Build your AI knowledge base</div>
+                    </div>
+                </div>
+                <div class="custom-tasks" id="custom-system"></div>
+            </div>
+        </div>
+
+        <!-- PARKING LOT -->
+        <div class="card parking-card">
+            <div class="card-header collapsible-header collapsed" onclick="toggleSection(this)">
+                <div style="display: flex; align-items: center;">
+                    <div class="card-icon">🅿️</div>
+                    <div>
+                        <div class="card-title">Parking Lot</div>
+                        <div class="card-subtitle">Important but not allowed to crowd commit list</div>
+                    </div>
+                </div>
+                <button class="add-task-btn" onclick="event.stopPropagation(); showAddForm('parking')">+</button>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="collapsible-content collapsed">
+                <div class="add-task-form" id="form-parking">
+                    <input type="text" id="input-parking" placeholder="Add a new task..." onkeypress="handleEnter(event, 'parking')">
+                    <div class="form-btns">
+                        <button class="save-btn" onclick="addTask('parking')">Add</button>
+                        <button class="cancel-btn" onclick="hideAddForm('parking')">Cancel</button>
+                    </div>
+                </div>
+                <div class="task-item" data-task="parking">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Red Bull application plan</div>
+                        <div class="task-details">Frameworks + "above and beyond" asset + referral ask</div>
+                        <span class="tag-life task-tag">Life</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="parking">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Poshmark: list boots, renew listings, share</div>
+                        <span class="tag-life task-tag">Life</span>
+                        <span class="tag-money task-tag">$$$</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="parking">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Target return: shirt + planner</div>
+                        <span class="tag-life task-tag">Life</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="parking">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Creative: Finish Julia + Sarah shirt</div>
+                        <span class="tag-life task-tag">Creative</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="parking">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Creative: Finish Diane beluga shirt</div>
+                        <span class="tag-life task-tag">Creative</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="parking">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Creative: Explore "Save the Whale" shirt idea</div>
+                        <span class="tag-life task-tag">Creative</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="parking">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Strategy toolkit implementation</div>
+                        <div class="task-details">Inventory modules, tag each, create index, apply one tool to lane decision</div>
+                        <span class="tag-helioflux task-tag">HelioFlux</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="parking">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Deep research memo (pick Track A or E)</div>
+                        <div class="task-details">A: Evidence + Claims hardening, E: Budget ladder justification</div>
+                        <span class="tag-helioflux task-tag">HelioFlux</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="parking">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Learning: Claude Code video, Cowork workflows, AI prompts</div>
+                        <span class="tag-life task-tag">Learning</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="parking">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Do the NLW AI Daily Brief AI New Year Challenge</div>
+                        <span class="tag-life task-tag">Learning</span>
+                    </div>
+                </div>
+
+                <div class="task-item" data-task="parking">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">Create an AI use case matrix using vibe coding</div>
+                        <div class="task-details">Explore AI tools + methods for different use cases</div>
+                        <span class="tag-life task-tag">Learning</span>
+                    </div>
+                </div>
+                <div class="custom-tasks" id="custom-parking"></div>
+            </div>
+        </div>
+
+        <footer>
+            K-COS • Kelly's Canonical Operating System<br>
+            "Capture is always allowed. Processing happens in the weekly reset."
+        </footer>
+    </div>
+
+    <script>
+        // Custom tasks storage
+        let customTasks = {};
+
+        // Toggle task completion
+        function toggleTask(checkbox) {
+            checkbox.classList.toggle('checked');
+            checkbox.closest('.task-item').classList.toggle('completed');
+
+            // Check if this is a custom task and save its state
+            const taskItem = checkbox.closest('.task-item');
+            if (taskItem.dataset.customId) {
+                const section = taskItem.dataset.task;
+                const taskId = taskItem.dataset.customId;
+                if (customTasks[section]) {
+                    const task = customTasks[section].find(t => t.id === taskId);
+                    if (task) {
+                        task.completed = checkbox.classList.contains('checked');
+                        saveCustomTasks();
+                    }
+                }
+            }
+
+            updateProgress();
+            saveState();
+        }
+
+        // Toggle collapsible sections
+        function toggleSection(header) {
+            header.classList.toggle('collapsed');
+            const content = header.nextElementSibling;
+            content.classList.toggle('collapsed');
+        }
+
+        // Toggle rules panel
+        function toggleRules() {
+            const toggle = document.querySelector('.rules-toggle');
+            const content = document.getElementById('rulesContent');
+            toggle.classList.toggle('open');
+            content.classList.toggle('open');
+        }
+
+        // Show add task form
+        function showAddForm(section) {
+            const form = document.getElementById('form-' + section);
+            form.classList.add('active');
+            document.getElementById('input-' + section).focus();
+        }
+
+        // Hide add task form
+        function hideAddForm(section) {
+            const form = document.getElementById('form-' + section);
+            form.classList.remove('active');
+            document.getElementById('input-' + section).value = '';
+        }
+
+        // Handle enter key in input
+        function handleEnter(event, section) {
+            if (event.key === 'Enter') {
+                addTask(section);
+            }
+        }
+
+        // Add a new task
+        function addTask(section) {
+            const input = document.getElementById('input-' + section);
+            const title = input.value.trim();
+
+            if (!title) return;
+
+            // Create task object
+            const task = {
+                id: 'task-' + Date.now(),
+                title: title,
+                completed: false,
+                createdAt: new Date().toISOString()
+            };
+
+            // Add to storage
+            if (!customTasks[section]) {
+                customTasks[section] = [];
+            }
+            customTasks[section].push(task);
+
+            // Save and render
+            saveCustomTasks();
+            renderCustomTask(section, task);
+
+            // Clear and hide form
+            hideAddForm(section);
+            updateProgress();
+        }
+
+        // Render a single custom task
+        function renderCustomTask(section, task) {
+            const container = document.getElementById('custom-' + section);
+
+            const taskHtml = `
+                <div class="task-item ${task.completed ? 'completed' : ''}" data-task="${section}" data-custom-id="${task.id}">
+                    <div class="task-checkbox ${task.completed ? 'checked' : ''}" onclick="toggleTask(this)"></div>
+                    <div class="task-content">
+                        <div class="task-title">${escapeHtml(task.title)}</div>
+                    </div>
+                    <span class="task-delete" onclick="deleteTask('${section}', '${task.id}')" title="Delete task">×</span>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', taskHtml);
+        }
+
+        // Delete a custom task
+        function deleteTask(section, taskId) {
+            if (!confirm('Delete this task?')) return;
+
+            // Remove from storage
+            if (customTasks[section]) {
+                customTasks[section] = customTasks[section].filter(t => t.id !== taskId);
+                saveCustomTasks();
+            }
+
+            // Remove from DOM
+            const taskElement = document.querySelector(`[data-custom-id="${taskId}"]`);
+            if (taskElement) {
+                taskElement.remove();
+            }
+
+            updateProgress();
+        }
+
+        // Save custom tasks to localStorage
+        function saveCustomTasks() {
+            localStorage.setItem('kellyCustomTasks', JSON.stringify(customTasks));
+        }
+
+        // Load custom tasks from localStorage
+        function loadCustomTasks() {
+            const saved = localStorage.getItem('kellyCustomTasks');
+            if (saved) {
+                customTasks = JSON.parse(saved);
+
+                // Render all custom tasks
+                for (const section in customTasks) {
+                    customTasks[section].forEach(task => {
+                        renderCustomTask(section, task);
+                    });
+                }
+            }
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Update progress bar
+        function updateProgress() {
+            const total = document.querySelectorAll('.task-checkbox').length;
+            const completed = document.querySelectorAll('.task-checkbox.checked').length;
+            const percentage = total > 0 ? (completed / total) * 100 : 0;
+
+            document.getElementById('progressBar').style.width = percentage + '%';
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('totalCount').textContent = total;
+        }
+
+        // Save state to localStorage
+        function saveState() {
+            // Save original task states (by index for hardcoded tasks)
+            const checkboxes = document.querySelectorAll('.task-item:not([data-custom-id]) .task-checkbox');
+            const state = [];
+            checkboxes.forEach((cb, index) => {
+                state.push(cb.classList.contains('checked'));
+            });
+            localStorage.setItem('kellyTasksComplete', JSON.stringify(state));
+
+            // Save collapsed state
+            const headers = document.querySelectorAll('.collapsible-header');
+            const collapsed = [];
+            headers.forEach((h, index) => {
+                collapsed.push(h.classList.contains('collapsed'));
+            });
+            localStorage.setItem('kellyCollapsed', JSON.stringify(collapsed));
+        }
+
+        // Load state from localStorage
+        function loadState() {
+            // Load original task states
+            const saved = localStorage.getItem('kellyTasksComplete');
+            if (saved) {
+                const state = JSON.parse(saved);
+                const checkboxes = document.querySelectorAll('.task-item:not([data-custom-id]) .task-checkbox');
+                checkboxes.forEach((cb, index) => {
+                    if (state[index]) {
+                        cb.classList.add('checked');
+                        cb.closest('.task-item').classList.add('completed');
+                    }
+                });
+            }
+
+            // Load collapsed state
+            const collapsedSaved = localStorage.getItem('kellyCollapsed');
+            if (collapsedSaved) {
+                const collapsed = JSON.parse(collapsedSaved);
+                const headers = document.querySelectorAll('.collapsible-header');
+                headers.forEach((h, index) => {
+                    if (collapsed[index]) {
+                        h.classList.add('collapsed');
+                        h.nextElementSibling.classList.add('collapsed');
+                    } else {
+                        h.classList.remove('collapsed');
+                        h.nextElementSibling.classList.remove('collapsed');
+                    }
+                });
+            }
+
+            // Load custom tasks
+            loadCustomTasks();
+
+            updateProgress();
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', loadState);
+    </script>
+</body>
+</html>
